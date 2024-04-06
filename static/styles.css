@@ -1,0 +1,85 @@
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4; /* Light gray background */
+    color: #333; /* Dark gray text */
+}
+
+
+
+/* Center the h1 heading */
+h1 {
+    text-align: center;
+}
+
+
+/* Container styles */
+.container {
+    max-width: 800px; /* Maximum width for the container */
+    width: 90%; /* Set a default width */
+    margin: 50px auto; /* Center the container vertically and horizontally */
+    padding: 20px;
+    background-color: #fff; /* White container */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Input styles */
+.input-container {
+    margin-bottom: 20px;
+}
+
+.input-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-container input[type="file"] {
+    margin-top: 5px;
+}
+
+/* Button styles */
+.button {
+    display: block; /* Ensure the button takes full width */
+    margin: 20px auto; /* Center the button horizontally */
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue button */
+    color: #fff; /* White text */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center; /* Center text */
+    width: 100%; /* Ensure button takes full width */
+}
+
+.button:hover {
+    background-color: #0056b3; /* Darker shade of blue on hover */
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd; /* Light gray border */
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2; /* Light gray for table header */
+    font-weight: bold;
+    text-align: left;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+}
