@@ -7,8 +7,6 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-
-
 </head>
 <body class="container">
     <h1>PDF Data Extractor</h1>
@@ -23,12 +21,15 @@
     </div>
     <!-- Button to submit data -->
     <button class="button" onclick="submitData()">Submit</button>
+    <!-- Button to refresh the page -->
+    <button class="button" id="refreshButton" onclick="refreshPage()" style="display:none;">Add New Data</button>
     <div id="tableContainer"></div>
 
     <!-- Table to display extracted data -->
     <table id="dataTable" class="display">
         <thead>
             <tr>
+                <th>Serial Number</th>
                 <th>Course Code</th>
                 <th>Course Name</th>
                 <th>Term/Method</th>
@@ -48,171 +49,73 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
 
     <script>
-            function adjustContainerWidth() {
-        var table = document.getElementById('dataTable');
-        var container = document.getElementById('tableContainer');
-        var tableWidth = table.offsetWidth;
-        container.style.width = tableWidth + 'px';
-    }
+        function adjustContainerWidth() {
+            var table = document.getElementById('dataTable');
+            var container = document.getElementById('tableContainer');
+            var tableWidth = table.offsetWidth;
+            container.style.width = tableWidth + 'px';
+        }
 
-       // Call the adjustContainerWidth function when the window is resized
-       window.addEventListener('resize', adjustContainerWidth);
+        window.addEventListener('resize', adjustContainerWidth);
+        window.addEventListener('load', adjustContainerWidth);
 
-// Call the adjustContainerWidth function when the page is loaded
-window.addEventListener('load', adjustContainerWidth);
-       // Submit data function
-function submitData() {
-    const files = document.getElementById('fileInput').files;
-    const folders = document.getElementById('folderInput').files;
-//     console.log("Files selected:", files);
-//     console.log("Folders selected:", folders);
-// console.log("File name:", file.name);
+        function submitData() {
+            const files = document.getElementById('fileInput').files;
+            const folders = document.getElementById('folderInput').files;
 
-    const formData = new FormData();
+            const formData = new FormData();
 
-    // Append selected files to form data
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        formData.append('files', file);
-    }
+            // Append selected files to form data
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                formData.append('files', file);
+            }
 
-    // Append selected folder to form data
-    for (let i = 0; i < folders.length; i++) {
-        const folder = folders[i];
-        formData.append('folders', folder);
-    }
+            // Append selected folder files to form data
+            for (let i = 0; i < folders.length; i++) {
+                const file = folders[i];
+                formData.append('files', file);
+            }
 
-    // Send files in form data
-    fetch('/extract-pdf-data', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        addToTable(data);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error extracting data. Please try again.');
-    });
-}
-function handleFolder(folder) {
-    const files = folder.webkitEntries || folder.entries || [];
-
-    console.log("Folders selected:", folder);
-    console.log("Files in folder:", files);
-
-    // Loop through each file in the folder
-    for (let i = 0; i < files.length; i++) {
-        const entry = files[i];
-        if (entry.isFile) {
-            // If it's a file, extract data from it
-            entry.file(function(file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const pdfData = event.target.result;
-                    console.log("PDF data loaded:", pdfData);
-                    extractDataFromPDF(file.name, pdfData);
-                };
-
-                reader.onerror = function(event) {
-                    console.error("Error reading file:", event.target.error);
-                };
-
-                reader.readAsArrayBuffer(file);
+            // Send files in form data
+            fetch('/extract-pdf-data', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                addToTable(data);
+                document.getElementById('refreshButton').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error extracting data. Please try again.');
             });
         }
-    }
-}
 
+        function addToTable(data) {
+            console.log("Data received for table:", data);
 
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
 
-
-
-function extractDataFromFile(file) {
-    console.log("Extracting data from file:", file.name);
-    const reader = new FileReader();
-
-    reader.onload = function(event) {
-        const pdfData = event.target.result;
-        console.log("PDF data loaded:", pdfData);
-        extractDataFromPDF(file.name, pdfData);
-    };
-
-    reader.onerror = function(event) {
-        console.error("Error reading file:", event.target.error);
-    };
-
-    reader.readAsArrayBuffer(file);
-}
-
-function extractDataFromPDF(fileName, pdfData) {
-    console.log("Extracting data from PDF:", fileName);
-
-    return fetch('/extract-pdf-data', {
-        method: 'POST',
-        body: pdfData
-    })
-    .then(response => {
-        console.log(`Response for ${fileName}:`, response);
-        if (!response.ok) {
-            throw new Error(`Network response was not ok for ${fileName}`);
+            data.forEach((pdfData, index) => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = index + 1; // Serial Number
+                row.insertCell().textContent = pdfData['Course Code'];
+                row.insertCell().textContent = pdfData['Course Name'];
+                row.insertCell().textContent = pdfData['Term/Method'];
+                row.insertCell().textContent = pdfData['Textbook Data']['Raw_Text'];
+            });
         }
-        return response.json();
-    })
-    .catch(error => {
-        console.error(`Error extracting data from ${fileName}:`, error);
-        alert(`Error extracting data from ${fileName}. Please try again.`);
-        return null;
-    });
-}
 
+        function refreshPage() {
+            location.reload();
+        }
 
-
-
-
-function addToTable(data) {
-    console.log("Data received for table:", data); // Log the data array
-    
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = '';
-
-    data.forEach(pdfData => {
-        const row = tableBody.insertRow();
-        row.insertCell().textContent = pdfData['Course Code'];
-        row.insertCell().textContent = pdfData['Course Name'];
-        row.insertCell().textContent = pdfData['Term/Method'];
-        row.insertCell().textContent = pdfData['Textbook Data']['Raw_Text'];
-    });
-}
-
-// Add event listener for file input
-document.getElementById('fileInput').addEventListener('change', function (event) {
-    console.log("Files selected:", event.target.files);
-    const files = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        extractDataFromFile(file);
-    }
-});
-
-// Add event listener for folder input
-document.getElementById('folderInput').addEventListener('change', function (event) {
-    console.log("Folder input changed");
-    const folders = event.target.files;
-    console.log("Folders selected:", folders);
-    for (let i = 0; i < folders.length; i++) {
-        const folder = folders[i];
-        handleFolder(folder);
-    }
-});
-
-// Initialize DataTable
-$(document).ready(function() {
-    $('#dataTable').DataTable();
-});
-
-
-</script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable();
+        });
+    </script>
 </body>
 </html>
