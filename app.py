@@ -2,12 +2,17 @@ from flask import Flask, request, jsonify, render_template
 import os
 import tempfile
 from pdf_utils import extract_data_from_pdf
+from flask import send_from_directory
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    return send_from_directory('js', filename)
 
 @app.route('/extract-pdf-data', methods=['POST'])
 def extract_pdf_data():

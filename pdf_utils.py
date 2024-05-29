@@ -18,7 +18,7 @@ def extract_data_from_pdf(pdf_path):
             page = pdf_reader.pages[page_num]
             page_text = page.extract_text()
 
-            match_code = re.search(r'Prefix and Code\s*([^\n]+)', page_text)
+            match_code = re.search(r'Prefix and Code\s*([A-Za-z]+\s*\d+)\s*Credits', page_text)
             if match_code:
                 course_code = match_code.group(1).strip()
 
