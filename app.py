@@ -30,4 +30,4 @@ def extract_pdf_data():
     return jsonify(extracted_data_list)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False,host='0.0.0.0')
